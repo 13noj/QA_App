@@ -34,16 +34,6 @@ import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity {
 
-    //********************************************************************課題
-    itemFavorite = (item) findViewById(R.id.nav_favorite); //お気に入り項目
-    //ログインしていなければ見えない
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    if (user == null) {
-        itemFavorite.setVisibility(false);         //ログインしているとお気に入りに登録ボタンが現れる。
-    }
-    //********************************************************************課題
-
-
     private Toolbar mToolbar;
     private int mGenre = 0;
 
