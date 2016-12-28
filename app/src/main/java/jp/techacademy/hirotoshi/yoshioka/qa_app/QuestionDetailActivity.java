@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,13 +18,19 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 
+import static android.view.View.VISIBLE;
+
+
 public class QuestionDetailActivity extends AppCompatActivity {
 
+    Button imageButton; //*******************************added
     private ListView mListView;
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
+
+
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -108,8 +115,45 @@ public class QuestionDetailActivity extends AppCompatActivity {
             }
         });
 
+        //********************************************************************課題
+        imageButton = (Button) findViewById(R.id.imageButtonSelector); //お気に入りボタン
+        //ログインしていなければ見えない
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            imageButton.setVisibility(VISIBLE);         //ログインしているとお気に入りに登録ボタンが現れる。
+        }
+        //********************************************************************課題
+
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // ログイン済みのユーザーを収録する
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if (user == null) {
+                    // ログインしていなければログイン画面に遷移させる
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(intent);
+                } else {
+                    // Questionを渡して回答作成画面を起動する
+                    // --- ここから ---
+                    Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
+                    intent.putExtra("question", mQuestion);
+                    startActivity(intent);
+                    // --- ここまで ---
+                }
+            }
+        });
+
+
+        addListenerOnButton(); //************************************added for HW
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
     }
+
+    public void addListenerOnButton() {
+        imageButton = (Button) findViewById(R.id.imageButtonSelector);
+    }
+
 }

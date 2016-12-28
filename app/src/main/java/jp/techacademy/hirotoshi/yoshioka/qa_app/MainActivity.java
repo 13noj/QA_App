@@ -30,7 +30,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static android.view.View.VISIBLE;
+
 public class MainActivity extends AppCompatActivity {
+
+    //********************************************************************課題
+    itemFavorite = (item) findViewById(R.id.nav_favorite); //お気に入り項目
+    //ログインしていなければ見えない
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    if (user == null) {
+        itemFavorite.setVisibility(false);         //ログインしているとお気に入りに登録ボタンが現れる。
+    }
+    //********************************************************************課題
+
 
     private Toolbar mToolbar;
     private int mGenre = 0;
@@ -120,6 +132,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -179,9 +194,13 @@ public class MainActivity extends AppCompatActivity {
                     mToolbar.setTitle("コンピューター");
                     mGenre = 4;
                 }
-
+                else if (id == R.id.nav_favorite) {
+                    mToolbar.setTitle("お気に入り");   //************************課題　項目：お気に入り　ログインしていなければ見えないようにする。
+                    mGenre = 5;
+                }
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
+
 
                 // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
                 mQuestionArrayList.clear();
