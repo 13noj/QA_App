@@ -131,6 +131,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
         //    FirebaseDatabase.getInstance().getReference().child("users").child(uid).child(genre).push().setValue(qid);
+                ImageButton imageButton = (ImageButton) findViewById(R.id.favoriteButton);
                 imageButton.setImageResource(R.drawable.after);
 
             }
