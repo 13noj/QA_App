@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +50,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
+            ////////////////////////////////////////////////////String qid;
+            ////////////////////////////////////////////////////String genre;
 
             Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
@@ -116,44 +119,36 @@ public class QuestionDetailActivity extends AppCompatActivity {
         });
 
         //********************************************************************課題
-        imageButton = (Button) findViewById(R.id.imageButtonSelector); //お気に入りボタン
+        ImageButton imageButton = (ImageButton) findViewById(R.id.favoriteButton); //お気に入りボタン
         //ログインしていなければ見えない
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             imageButton.setVisibility(VISIBLE);         //ログインしているとお気に入りに登録ボタンが現れる。
         }
-        //********************************************************************課題
+
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // ログイン済みのユーザーを収録する
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        //    FirebaseDatabase.getInstance().getReference().child("users").child(uid).child(genre).push().setValue(qid);
+                imageButton.setImageResource(R.drawable.after);
 
-                if (user == null) {
-                    // ログインしていなければログイン画面に遷移させる
-                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(intent);
-                } else {
-                    // Questionを渡して回答作成画面を起動する
-                    // --- ここから ---
-                    Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
-                    intent.putExtra("question", mQuestion);
-                    startActivity(intent);
-                    // --- ここまで ---
-                }
             }
         });
+        //********************************************************************課題
 
 
+/*
         addListenerOnButton(); //************************************added for HW
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
-        mAnswerRef.addChildEventListener(mEventListener);
+        mAnswerRef.addChildEventListener(mEventListener);*/
     }
 
+    /*
     public void addListenerOnButton() {
+       // imageButton = (Button) findViewById(R.id.imageButtonSelector);
         imageButton = (Button) findViewById(R.id.imageButtonSelector);
     }
-
+*/
 }
