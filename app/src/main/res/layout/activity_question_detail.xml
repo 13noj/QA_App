@@ -18,15 +18,15 @@
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/plus" />
 
-    <Button
-        android:id="@+id/imageButtonSelector"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:id="@+id/favoriteButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_toStartOf="@+id/fab"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/change_button"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:visibility="invisible"/>
+        android:src="@drawable/before"
+        android:scaleType="fitCenter"
+        android:background="@null"/>
 
     <ListView
         android:layout_width="match_parent"
