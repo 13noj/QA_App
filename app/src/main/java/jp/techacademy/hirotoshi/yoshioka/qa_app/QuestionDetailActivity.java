@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -19,12 +19,13 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 
 public class QuestionDetailActivity extends AppCompatActivity {
 
-    Button imageButton; //*******************************added
+    private ImageButton imageButton; //*******************************added
     private ListView mListView;
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
@@ -100,6 +101,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 // ログイン済みのユーザーを収録する
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -119,32 +121,38 @@ public class QuestionDetailActivity extends AppCompatActivity {
         });
 
         //********************************************************************課題
-        ImageButton imageButton = (ImageButton) findViewById(R.id.favoriteButton); //お気に入りボタン
+        imageButton = (ImageButton) findViewById(R.id.favoriteButton); //お気に入りボタン
         //ログインしていなければ見えない
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            imageButton.setVisibility(VISIBLE);         //ログインしているとお気に入りに登録ボタンが現れる。
-        }
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            imageButton.setVisibility(INVISIBLE);         //デフォルトではお気に入りボタンが見えない。ログインしているとお気に入りに登録ボタンが現れる。
+        }
+        else{imageButton.setVisibility(VISIBLE);
+            Log.d("test", "visible");
+        }
+        //**********************************************************************
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-        //    FirebaseDatabase.getInstance().getReference().child("users").child(uid).child(genre).push().setValue(qid);
-                ImageButton imageButton = (ImageButton) findViewById(R.id.favoriteButton);
+            public void onClick(View view2) {
+                Log.d("test", "clicked");
                 imageButton.setImageResource(R.drawable.after);
-
             }
         });
+
+
+
+        //    FirebaseDatabase.getInstance().getReference().child("users").child(uid).child(genre).push().setValue(qid);
+        //   ImageButton ib = (ImageButton) findViewById(R.id.favoriteButton);
+
         //********************************************************************課題
-
-
 /*
         addListenerOnButton(); //************************************added for HW
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);*/
-    }
+        }
 
     /*
     public void addListenerOnButton() {
