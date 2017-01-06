@@ -15,24 +15,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class FavoriteList extends AppCompatActivity {
+    
     DatabaseReference mDatabaseReference;//*******************************added 課題
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
+    private DatabaseReference mFavoriteRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setContentView(R.layout.content_main);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_favorite_list);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mDatabaseReference.addChildEventListener(mEventListener);
         mQuestionArrayList.clear();
         mAdapter.setQuestionArrayList(mQuestionArrayList);
         mListView.setAdapter(mAdapter);
+        mListView = (ListView) findViewById(R.id.listView);
+        mAdapter = new QuestionsListAdapter(this);
+        mFavoriteRef = mDatabaseReference.child("users").child(uid).child("favorite");
+        mFavoriteRef.addChildEventListener(mEventListener);
     }
     //////////////////////////////////課題//////////////////////////////////////////////////////////////
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot parentDataSnapshot, String s) {
+            HashMap map = (HashMap) parentDataSnapshot.getValue();
+            String uid = (String) map.get("uid");
             if (!parentDataSnapshot.getKey().equals("contents")) {
                 return; // 質問の情報を取りたいので、キーがcontentsではない場合、そのままリターンする
             }
