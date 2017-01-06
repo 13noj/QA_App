@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else{
                     Log.d("test", "お気に入りです");
-                    Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
+                    //Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
                 }
                 return true;
             }
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Questionのインスタンスを渡して質問詳細画面を起動する
-                Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
+                Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
                 intent.putExtra("question", mQuestionArrayList.get(position));
                 Question q = mQuestionArrayList.get(position);
 

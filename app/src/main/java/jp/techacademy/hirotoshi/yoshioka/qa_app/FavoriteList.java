@@ -3,6 +3,7 @@ package jp.techacademy.hirotoshi.yoshioka.qa_app;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ListView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -10,17 +11,23 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class FavoriteList extends AppCompatActivity {
     DatabaseReference mDatabaseReference;//*******************************added 課題
-
+    private ListView mListView;
+    private ArrayList<Question> mQuestionArrayList;
+    private QuestionsListAdapter mAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_list);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mDatabaseReference.addChildEventListener(mEventListener);
+        mQuestionArrayList.clear();
+        mAdapter.setQuestionArrayList(mQuestionArrayList);
+        mListView.setAdapter(mAdapter);
     }
     //////////////////////////////////課題//////////////////////////////////////////////////////////////
     private ChildEventListener mEventListener = new ChildEventListener() {
@@ -58,6 +65,8 @@ public class FavoriteList extends AppCompatActivity {
         public void onCancelled(DatabaseError databaseError) {
         }
     };
+
+
 //////////////////////////////////課題//////////////////////////////////////////////////////////////
 
 }

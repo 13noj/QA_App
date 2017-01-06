@@ -39,14 +39,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
   private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
       @Override
       public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-          Log.d("test", "OK");
           HashMap map = (HashMap) dataSnapshot.getValue();
 
           String questionUid = (String) map.get("questionUid"); // ここです
-          Log.d("test", "questionUid");
-          Log.d("test", questionUid);
-          Log.d("test", "mQuestion.getQuestionUid()");
-          Log.d("test", mQuestion.getQuestionUid());
 
           if (questionUid.equals(mQuestion.getQuestionUid())){
               imageButton.setImageResource(R.drawable.after);
@@ -169,7 +164,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
             imageButton.setVisibility(INVISIBLE);         //デフォルトではお気に入りボタンが見えない。ログインしているとお気に入りに登録ボタンが現れる。
         }
         else{imageButton.setVisibility(VISIBLE);
-            Log.d("test", "visible");
         }
 
         if (user != null) {
