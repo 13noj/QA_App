@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,6 +39,7 @@ import java.util.Map;
 
 public class QuestionSendActivity extends AppCompatActivity implements View.OnClickListener, DatabaseReference.CompletionListener {
 
+    private Button imageButton; //*******************************added
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     private static final int CHOOSER_REQUEST_CODE = 100;
 
@@ -189,7 +191,13 @@ public class QuestionSendActivity extends AppCompatActivity implements View.OnCl
             genreRef.push().setValue(data, this);
             mProgress.show();
         }
+        else if (v == imageButton) {
+            //imageButton = (ImageButton) findViewById(R.id.favoriteButton);
+
+        }
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {

@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -25,14 +26,53 @@ import static android.view.View.VISIBLE;
 
 public class QuestionDetailActivity extends AppCompatActivity {
 
-    private ImageButton imageButton; //*******************************added
+    private ImageButton imageButton; //*******************************added 課題
+    private boolean favorite; //*******************************added 課題
     private ListView mListView;
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
-
+    private DatabaseReference mDatabaseReference;//*******************************added 課題
+    private DatabaseReference mFavoriteRef;//*******************************added 課題
     private DatabaseReference mAnswerRef;
 
+//////////////////////////////////課題//////////////////////////////////////////////////////////////
+  private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+      @Override
+      public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+          Log.d("test", "OK");
+          HashMap map = (HashMap) dataSnapshot.getValue();
 
+          String questionUid = (String) map.get("questionUid"); // ここです
+          Log.d("test", "questionUid");
+          Log.d("test", questionUid);
+          Log.d("test", "mQuestion.getQuestionUid()");
+          Log.d("test", mQuestion.getQuestionUid());
+
+          if (questionUid.equals(mQuestion.getQuestionUid())){
+              imageButton.setImageResource(R.drawable.after);
+          }
+      }
+      @Override
+      public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+      }
+
+      @Override
+      public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+      }
+
+      @Override
+      public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+      }
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+
+      }
+  };
+//////////////////////////////////課題//////////////////////////////////////////////////////////////
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -111,7 +151,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     startActivity(intent);
                 } else {
                     // Questionを渡して回答作成画面を起動する
-                    // --- ここから ---
+
                     Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
                     intent.putExtra("question", mQuestion);
                     startActivity(intent);
@@ -131,33 +171,29 @@ public class QuestionDetailActivity extends AppCompatActivity {
         else{imageButton.setVisibility(VISIBLE);
             Log.d("test", "visible");
         }
-        //**********************************************************************
+
+        if (user != null) {
+            mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            mFavoriteRef = mDatabaseReference.child("users").child(uid).child("favorite");
+            mFavoriteRef.addChildEventListener(mFavoriteEventListener);
+        }
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view2) {
-                Log.d("test", "clicked");
+            public void onClick(View view) {
                 imageButton.setImageResource(R.drawable.after);
+                favorite = true;
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra("favorite", favorite);
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                Map<String, String> favoriteData = new HashMap<String, String>();
+                favoriteData.put(mQuestion.getQuestionUid(), mQuestion.getQuestionUid());
+                favoriteData.put("questionUid", mQuestion.getQuestionUid()); // ここです
+                FirebaseDatabase.getInstance().getReference().child("users").child(uid).child("favorite").push().setValue(favoriteData);
             }
         });
-
-
-
-        //    FirebaseDatabase.getInstance().getReference().child("users").child(uid).child(genre).push().setValue(qid);
-        //   ImageButton ib = (ImageButton) findViewById(R.id.favoriteButton);
-
-        //********************************************************************課題
-/*
-        addListenerOnButton(); //************************************added for HW
-        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
-        mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
-        mAnswerRef.addChildEventListener(mEventListener);*/
+        //**********************************************************************
         }
 
-    /*
-    public void addListenerOnButton() {
-       // imageButton = (Button) findViewById(R.id.imageButtonSelector);
-        imageButton = (Button) findViewById(R.id.imageButtonSelector);
-    }
-*/
 }

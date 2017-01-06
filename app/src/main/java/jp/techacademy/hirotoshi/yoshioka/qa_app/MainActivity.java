@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,19 +31,23 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private int mGenre = 0;
+    private boolean favorite;
 
     // --- ここから ---
     private DatabaseReference mDatabaseReference;
+    private DatabaseReference mFavoriteRef; //*****************************************課題追加
     private DatabaseReference mGenreRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
+
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -122,8 +127,28 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    //////////////////////////////////課題//////////////////////////////////////////////////////////////
+    @Override
+    protected void onResume() {
+        super.onResume();  // Always call the superclass method first
+        // ナビゲーションドロワーの設定
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            navigationView.getMenu().clear();//*********************************remove the list once and then reload depending on login condition
+            navigationView.inflateMenu(R.menu.activity_main_drawer_not_login); //お気に入りがないやつ
 
+        } else {
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_main_drawer); //お気に入りがあるやつ
+        }
+    }
+    //////////////////////////////////課題//////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +156,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+        Bundle extras = getIntent().getExtras();
+   //     boolean favorite = extras.getBoolean("favorite"); ///////////課題
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -159,6 +186,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
+
         // ナビゲーションドロワーの設定
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name);
@@ -166,11 +196,21 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            navigationView.getMenu().clear();//*********************************remove the list once and then reload depending on login condition
+            navigationView.inflateMenu(R.menu.activity_main_drawer_not_login); //お気に入りがないやつ
+
+        } else {
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_main_drawer); //お気に入りがあるやつ
+        }
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
-
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab); //質問作成ボタン
+                fab.setVisibility(VISIBLE);
                 if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
                     mGenre = 1;
@@ -184,13 +224,15 @@ public class MainActivity extends AppCompatActivity {
                     mToolbar.setTitle("コンピューター");
                     mGenre = 4;
                 }
+                /////////////課題//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 else if (id == R.id.nav_favorite) {
-                    mToolbar.setTitle("お気に入り");   //************************課題　項目：お気に入り　ログインしていなければ見えないようにする。
-                    mGenre = 5;
+                    mToolbar.setTitle("お気に入り");
+                    fab.setVisibility(INVISIBLE); //課題お気に入りを選択した場合は質問作成ボタンを見えなくする
                 }
+                /////////////課題//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
-
 
                 // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
                 mQuestionArrayList.clear();
@@ -201,8 +243,16 @@ public class MainActivity extends AppCompatActivity {
                 if (mGenreRef != null) {
                     mGenreRef.removeEventListener(mEventListener);
                 }
-                mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
-                mGenreRef.addChildEventListener(mEventListener);
+
+                if (id != R.id.nav_favorite) {
+                    Log.d("test", "ジャンルです");
+                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                    mGenreRef.addChildEventListener(mEventListener);
+                }
+                else{
+                    Log.d("test", "お気に入りです");
+                    Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
+                }
                 return true;
             }
         });
@@ -220,8 +270,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Questionのインスタンスを渡して質問詳細画面を起動する
-                Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
+                Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
                 intent.putExtra("question", mQuestionArrayList.get(position));
+                Question q = mQuestionArrayList.get(position);
+
                 startActivity(intent);
             }
         });
