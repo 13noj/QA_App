@@ -136,8 +136,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -341,16 +339,6 @@ public class MainActivity extends AppCompatActivity {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     Log.d("test", "before: " + mFavoriteRef);
                     mFavoriteRef = mDatabaseReference.child(Const.UsersPATH).child(user.getUid()).child("favorite");
-
-                    /*
-                    1. UID の取得の仕方
-                    2.　何故UIDを直接入れるとレラーが出るか。
-                    3.　その他項目の入力方法。mapの設定。
-
-
-
-
-                     */
 
 
 

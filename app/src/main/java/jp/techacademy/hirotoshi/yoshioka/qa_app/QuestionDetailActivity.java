@@ -38,7 +38,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;//*******************************added 課題
     private DatabaseReference mFavoriteRef;//*******************************added 課題
     private DatabaseReference mAnswerRef;
-
+    private String imageString;
 //////////////////////////////////課題//////////////////////////////////////////////////////////////
   private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
       @Override
@@ -49,28 +49,31 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
           if (questionUid.equals(mQuestion.getQuestionUid())){
               imageButton.setImageResource(R.drawable.after);
+              String answerUid = dataSnapshot.getKey();
+              String body = (String) map.get("body");
+              String name = (String) map.get("name");
+              String uid = (String) map.get("uid");
+              imageString = (String) map.get("image");
+              Answer answer = new Answer(body, name, uid, answerUid);
+              mQuestion.getAnswers().add(answer);
+              mAdapter.notifyDataSetChanged();
           }
-
 
       }
       @Override
       public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
       }
 
       @Override
       public void onChildRemoved(DataSnapshot dataSnapshot) {
-
       }
 
       @Override
       public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
       }
 
       @Override
       public void onCancelled(DatabaseError databaseError) {
-
       }
   };
 //////////////////////////////////課題//////////////////////////////////////////////////////////////
@@ -92,9 +95,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
-            ////////////////////////////////////////////////////String qid;
-            ////////////////////////////////////////////////////String genre;
-
             Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
             mAdapter.notifyDataSetChanged();
@@ -185,6 +185,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 imageButton.setImageResource(R.drawable.after);
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 String uid = FirebaseAuth.getInstance().getCurrentUser().getUid(); //////////////////UID 課題
+
                 Map<String, String> favoriteData = new HashMap<String, String>();
                 favoriteData.put(mQuestion.getQuestionUid(), mQuestion.getQuestionUid());
                 favoriteData.put("questionUid", mQuestion.getQuestionUid()); // ここです
@@ -196,6 +197,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 favoriteData.put("title", mQuestion.getTitle());           //////////////////////タイトル取得課題。
                 favoriteData.put("name", mQuestion.getName());           //////////////////////表示名取得課題。
                 favoriteData.put("uid", uid); ////////////////user name
+                favoriteData.put("image", imageString); ////////////////user name
                 FirebaseDatabase.getInstance().getReference().child("users").child(uid).child("favorite").push().setValue(favoriteData);
             }
         });
