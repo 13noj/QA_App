@@ -189,15 +189,10 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 Map<String, String> favoriteData = new HashMap<String, String>();
                 favoriteData.put(mQuestion.getQuestionUid(), mQuestion.getQuestionUid());
                 favoriteData.put("questionUid", mQuestion.getQuestionUid()); // ここです
-
-                byte[] bytes;
-                //favoriteData.put("image", mQuestion.getImageBytes().Base64.encodeToString());
-
-
                 favoriteData.put("title", mQuestion.getTitle());           //////////////////////タイトル取得課題。
                 favoriteData.put("name", mQuestion.getName());           //////////////////////表示名取得課題。
                 favoriteData.put("uid", uid); ////////////////user name
-                favoriteData.put("image", imageString); ////////////////user name
+                favoriteData.put("image", imageString); ////////////////image
                 FirebaseDatabase.getInstance().getReference().child("users").child(uid).child("favorite").push().setValue(favoriteData);
             }
         });
