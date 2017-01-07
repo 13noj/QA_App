@@ -338,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                     mGenreRef.addChildEventListener(mEventListener);
                 }
                 else{
-                    Log.d("test", "お気に入りですよ。ごはんですよ。");
+                    Log.d("test", "お気に入りです." );
                     String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     mFavoriteRef = mDatabaseReference.child("users").child(uid).child("favorite");
                     mFavoriteRef.addChildEventListener(mFavoriteEventListener);
