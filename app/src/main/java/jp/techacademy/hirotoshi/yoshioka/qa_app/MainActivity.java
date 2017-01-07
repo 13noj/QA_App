@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
     private Question mQuestion;
-    int favoriteValue = 0;
 
     //////////////////////////////////課題//////////////////////////////////////////////////////////////
     private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
@@ -69,12 +68,13 @@ public class MainActivity extends AppCompatActivity {
                 bytes = new byte[0];
             }
 
-            String questionUid = (String) map.get("questionUid"); // ここです
-
-            if (questionUid.equals(mQuestion.getQuestionUid())){
-                favoriteValue = 1;
-            }
-
+            String questionUid = (String) map.get("questionUid");
+/*
+            for (Question question : mQuestionArrayList) {
+                if (question.getQuestionUid().equals(questionUid)) {
+                    favoriteValue = 1; }
+                }
+*/
             ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
             HashMap answerMap = (HashMap) map.get("answers");
             if (answerMap != null) {
@@ -122,21 +122,21 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
-
         }
 
         @Override
         public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-
         }
     };
-
 //////////////////////////////////課題//////////////////////////////////////////////////////////////
+
+
+
+
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -316,7 +316,6 @@ public class MainActivity extends AppCompatActivity {
                 else if (id == R.id.nav_favorite) {
                     mToolbar.setTitle("お気に入り");
                     fab.setVisibility(INVISIBLE); //課題お気に入りを選択した場合は質問作成ボタンを見えなくする
-                    Log.d("test", "ジャンルです：" + mGenre);
                 }
                 /////////////課題//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -335,18 +334,31 @@ public class MainActivity extends AppCompatActivity {
 
                 if (id != R.id.nav_favorite) {
                     mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                    Log.d("test", "this is: " + mGenreRef);
                     mGenreRef.addChildEventListener(mEventListener);
                 }
                 else{
-                    Log.d("test", "お気に入りです." );
-                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    mFavoriteRef = mDatabaseReference.child("users").child(uid).child("favorite");
-                    mFavoriteRef.addChildEventListener(mFavoriteEventListener);
-                   /*
-                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(4));
-                    mGenreRef.addChildEventListener(mEventListener);
-                    */
-                    //Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    Log.d("test", "before: " + mFavoriteRef);
+                    mFavoriteRef = mDatabaseReference.child(Const.UsersPATH).child(user.getUid()).child("favorite");
+
+                    /*
+                    1. UID の取得の仕方
+                    2.　何故UIDを直接入れるとレラーが出るか。
+                    3.　その他項目の入力方法。mapの設定。
+
+
+
+
+                     */
+
+
+
+                    Log.d("test", "after this is: " + mFavoriteRef);
+                    //mFavoriteRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(4));
+                    mFavoriteRef.addChildEventListener(mEventListener);
+
+
                 }
                 return true;
             }

@@ -1,12 +1,17 @@
 package jp.techacademy.hirotoshi.yoshioka.qa_app;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,6 +22,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,9 +31,7 @@ import static android.view.View.VISIBLE;
 
 
 public class QuestionDetailActivity extends AppCompatActivity {
-
     private ImageButton imageButton; //*******************************added 課題
-    private boolean favorite; //*******************************added 課題
     private ListView mListView;
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
@@ -46,6 +50,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
           if (questionUid.equals(mQuestion.getQuestionUid())){
               imageButton.setImageResource(R.drawable.after);
           }
+
+
       }
       @Override
       public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -177,13 +183,19 @@ public class QuestionDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 imageButton.setImageResource(R.drawable.after);
-                favorite = true;
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.putExtra("favorite", favorite);
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid(); //////////////////UID 課題
                 Map<String, String> favoriteData = new HashMap<String, String>();
                 favoriteData.put(mQuestion.getQuestionUid(), mQuestion.getQuestionUid());
                 favoriteData.put("questionUid", mQuestion.getQuestionUid()); // ここです
+
+                byte[] bytes;
+                //favoriteData.put("image", mQuestion.getImageBytes().Base64.encodeToString());
+
+
+                favoriteData.put("title", mQuestion.getTitle());           //////////////////////タイトル取得課題。
+                favoriteData.put("name", mQuestion.getName());           //////////////////////表示名取得課題。
+                favoriteData.put("uid", uid); ////////////////user name
                 FirebaseDatabase.getInstance().getReference().child("users").child(uid).child("favorite").push().setValue(favoriteData);
             }
         });
