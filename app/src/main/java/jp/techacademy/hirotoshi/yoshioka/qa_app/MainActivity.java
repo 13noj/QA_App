@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private int mGenre = 0;
-    private boolean favorite;
 
     // --- ここから ---
     private DatabaseReference mDatabaseReference;
@@ -47,7 +46,97 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
+    private Question mQuestion;
+    int favoriteValue = 0;
 
+    //////////////////////////////////課題//////////////////////////////////////////////////////////////
+    private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+        @Override
+
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            HashMap map = (HashMap) dataSnapshot.getValue();
+            String title = (String) map.get("title");
+            String body = (String) map.get("body");
+            String name = (String) map.get("name");
+            String uid = (String) map.get("uid");
+            String imageString = (String) map.get("image");
+            Bitmap image = null;
+            byte[] bytes;
+            if (imageString != null) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                bytes = Base64.decode(imageString, Base64.DEFAULT);
+            } else {
+                bytes = new byte[0];
+            }
+
+            String questionUid = (String) map.get("questionUid"); // ここです
+
+            if (questionUid.equals(mQuestion.getQuestionUid())){
+                favoriteValue = 1;
+            }
+
+            ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
+            HashMap answerMap = (HashMap) map.get("answers");
+            if (answerMap != null) {
+                for (Object key : answerMap.keySet()) {
+                    HashMap temp = (HashMap) answerMap.get((String) key);
+                    String answerBody = (String) temp.get("body");
+                    String answerName = (String) temp.get("name");
+                    String answerUid = (String) temp.get("uid");
+                    Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
+                    answerArrayList.add(answer);
+                }
+            }
+
+            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+            mQuestionArrayList.add(question);
+            mAdapter.notifyDataSetChanged();
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            HashMap map = (HashMap) dataSnapshot.getValue();
+
+            // 変更があったQuestionを探す
+            for (Question question: mQuestionArrayList) {
+                if (dataSnapshot.getKey().equals(question.getQuestionUid())) {
+                    // このアプリで変更がある可能性があるのは回答(Answer)のみ
+                    question.getAnswers().clear();
+                    HashMap answerMap = (HashMap) map.get("answers");
+                    if (answerMap != null) {
+                        for (Object key : answerMap.keySet()) {
+                            HashMap temp = (HashMap) answerMap.get((String) key);
+                            String answerBody = (String) temp.get("body");
+                            String answerName = (String) temp.get("name");
+                            String answerUid = (String) temp.get("uid");
+                            Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
+                            question.getAnswers().add(answer);
+                        }
+                    }
+
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+//////////////////////////////////課題//////////////////////////////////////////////////////////////
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -157,7 +246,6 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         Bundle extras = getIntent().getExtras();
-   //     boolean favorite = extras.getBoolean("favorite"); ///////////課題
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -228,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
                 else if (id == R.id.nav_favorite) {
                     mToolbar.setTitle("お気に入り");
                     fab.setVisibility(INVISIBLE); //課題お気に入りを選択した場合は質問作成ボタンを見えなくする
+                    Log.d("test", "ジャンルです：" + mGenre);
                 }
                 /////////////課題//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -245,12 +334,18 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (id != R.id.nav_favorite) {
-                    Log.d("test", "ジャンルです");
                     mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                     mGenreRef.addChildEventListener(mEventListener);
                 }
                 else{
-                    Log.d("test", "お気に入りです");
+                    Log.d("test", "お気に入りですよ。ごはんですよ。");
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    mFavoriteRef = mDatabaseReference.child("users").child(uid).child("favorite");
+                    mFavoriteRef.addChildEventListener(mFavoriteEventListener);
+                   /*
+                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(4));
+                    mGenreRef.addChildEventListener(mEventListener);
+                    */
                     //Intent intent = new Intent(getApplicationContext(), FavoriteList.class);
                 }
                 return true;
