@@ -1,17 +1,11 @@
 package jp.techacademy.hirotoshi.yoshioka.qa_app;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,62 +15,26 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static android.view.View.INVISIBLE;
-import static android.view.View.VISIBLE;
-
+import android.widget.ImageButton; //*******************************added 課題
+import static android.view.View.INVISIBLE; //*******************************added 課題
+import static android.view.View.VISIBLE; //*******************************added 課題
 
 public class QuestionDetailActivity extends AppCompatActivity {
-    private ImageButton imageButton; //*******************************added 課題
     private ListView mListView;
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
+
+    private DatabaseReference mAnswerRef;
+
+    private ImageButton imageButton; //*******************************added 課題
     private DatabaseReference mDatabaseReference;//*******************************added 課題
     private DatabaseReference mFavoriteRef;//*******************************added 課題
-    private DatabaseReference mAnswerRef;
-    private String imageString;
-//////////////////////////////////課題//////////////////////////////////////////////////////////////
-  private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
-      @Override
-      public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-          HashMap map = (HashMap) dataSnapshot.getValue();
 
-          String questionUid = (String) map.get("questionUid"); // ここです
-
-          if (questionUid.equals(mQuestion.getQuestionUid())){
-              imageButton.setImageResource(R.drawable.after);
-              String answerUid = dataSnapshot.getKey();
-              String body = (String) map.get("body");
-              String name = (String) map.get("name");
-              String uid = (String) map.get("uid");
-              imageString = (String) map.get("image");
-              Answer answer = new Answer(body, name, uid, answerUid);
-              mQuestion.getAnswers().add(answer);
-              mAdapter.notifyDataSetChanged();
-          }
-
-      }
-      @Override
-      public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-      }
-
-      @Override
-      public void onChildRemoved(DataSnapshot dataSnapshot) {
-      }
-
-      @Override
-      public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-      }
-
-      @Override
-      public void onCancelled(DatabaseError databaseError) {
-      }
-  };
-//////////////////////////////////課題//////////////////////////////////////////////////////////////
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -95,6 +53,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
+
             Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
             mAdapter.notifyDataSetChanged();
@@ -102,22 +61,18 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
         }
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
-
         }
 
         @Override
         public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-
         }
     };
 
@@ -172,10 +127,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
         else{imageButton.setVisibility(VISIBLE);
         }
 
+
         if (user != null) {
             mDatabaseReference = FirebaseDatabase.getInstance().getReference();
             String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            mFavoriteRef = mDatabaseReference.child("users").child(uid).child("favorite");
+            mFavoriteRef = mDatabaseReference.child(Const.UsersPATH).child(uid).child("favorites");
             mFavoriteRef.addChildEventListener(mFavoriteEventListener);
         }
 
@@ -183,20 +139,59 @@ public class QuestionDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 imageButton.setImageResource(R.drawable.after);
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid(); //////////////////UID 課題
-
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                mFavoriteRef = mDatabaseReference;
+                mFavoriteRef = mDatabaseReference.child(Const.UsersPATH).child(user.getUid()).child("favorites");
+                mFavoriteRef.addChildEventListener(mFavoriteEventListener);
                 Map<String, String> favoriteData = new HashMap<String, String>();
+                favoriteData.put("genre", String.valueOf(mQuestion.getGenre())); ////////////////user name
                 favoriteData.put(mQuestion.getQuestionUid(), mQuestion.getQuestionUid());
                 favoriteData.put("questionUid", mQuestion.getQuestionUid()); // ここです
-                favoriteData.put("title", mQuestion.getTitle());           //////////////////////タイトル取得課題。
-                favoriteData.put("name", mQuestion.getName());           //////////////////////表示名取得課題。
-                favoriteData.put("uid", uid); ////////////////user name
-                favoriteData.put("image", imageString); ////////////////image
-                FirebaseDatabase.getInstance().getReference().child("users").child(uid).child("favorite").push().setValue(favoriteData);
+                FirebaseDatabase.getInstance().getReference().child(Const.UsersPATH).child(user.getUid()).child("favorites").push().setValue(favoriteData);
             }
         });
         //**********************************************************************
+    }
+
+    //////////////////////////////////課題//////////////////////////////////////////////////////////////
+    private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            HashMap map = (HashMap) dataSnapshot.getValue();
+            String questionUid = (String) map.get("questionUid"); // ここです
+            Log.d("test", "questionUid is:" + questionUid);
+            if (questionUid.equals(mQuestion.getQuestionUid())){
+                imageButton.setImageResource(R.drawable.after);
+                String answerUid = dataSnapshot.getKey();
+                String body = (String) map.get("body");
+                String name = (String) map.get("name");
+                String uid = (String) map.get("uid");
+                Answer answer = new Answer(body, name, uid, answerUid);
+                mQuestion.getAnswers().add(answer);
+                mAdapter.notifyDataSetChanged();
+            }
         }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
+//////////////////////////////////課題//////////////////////////////////////////////////////////////
+
+
+
 
 }
